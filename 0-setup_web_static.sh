@@ -4,7 +4,7 @@
 # Setting server ups
 #
 
-new_conf="http {\n\tserver {\n\t\tlisten 80;\n\t\tserver_name 54.80.218.139;\n\t\tlocation /hbnb_static {\n\t\t\talias /data/web_static/current/;\n\t\t\t}\n\t}"
+new_conf="http {\n\tserver {\n\t\tlisten 80;\n\t\tserver_name localhost;\n\t\tlocation /hbnb_static {\n\t\t\talias /data/web_static/current/;\n\t\t\t}\n\t}"
 
 apt update
 apt install -y nginx
