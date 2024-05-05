@@ -1,21 +1,39 @@
 #!/usr/bin/env bash
-# Install a nginx web server listening on port 80.
-#
-# Setting server ups
-#
+# Sets up the web servers for the deployment of web_static
 
-new_conf="http {\n\tserver {\n\t\tlisten 80;\n\t\tserver_name localhost;\n\t\tlocation /hbnb_static {\n\t\t\talias /data/web_static/current/;\n\t\t\t}\n\t}"
-
+# Update package lists
 apt update
-apt install -y nginx
-ufw allow 'Nginx HTTP'
-service nginx restart
 
+# Install Nginx
+apt install -y nginx
+
+# - Create the folders, if they don't yet exist:
+#   * '/data'
+#   * '/data/web_static/'
+#   * '/data/web_static/releases/'
+#   * '/data/web_static/releases/test/'
+#   * '/data/web_static/shared/'
 mkdir -p /data/web_static/releases/test/
-mkdir /data/web_static/shared/
-echo " " > /data/web_static/releases/test/index.html
-sed -i "s| |<html>\n\t<head>\n\t</head>\n\t<body>\n\t\tHolberton School\n\t</body>\n</html>\n|" /data/web_static/releases/test/index.html
-ln -sf /data/web_static/releases/test/ /data/web_static/current
+mkdir -p /data/web_static/shared/
+
+# Create a fake HTML file '/data/web_static/releases/test/index.html',
+# (with simple content, to test Nginx configuration)
+printf "<html>\n\t<head>\n\t</head>\n\t<body>\n\t\tHolberton School\n\t</body>\n</html>\n" | 
+tee /data/web_static/releases/test/index.html 
+
+# Create a symbolic link '/data/web_static/current' linked to the
+# '/data/web_static/releases/test/' folder.
+ln -fs /data/web_static/releases/test/ /data/web_static/current
+
+# Give recursive ownership of the '/data/' folder to the 'ubuntu' user AND group
 chown -R ubuntu:ubuntu /data/
-sed -i "s|http {|$new_conf|" /etc/nginx/nginx.conf
+
+# Update the Nginx configuration to serve the content of '/data/web_static/current/'
+# to 'hbnb_static' (ex: https://mydomainname.tech/hbnb_static).
+loc_header="location \/hbnb\_static\/ {"
+loc_content="alias \/data\/web\_static\/current\/;"
+new_location="\n\t$loc_header\n\t\t$loc_content\n\t}\n"
+sed -i "37s/$/$new_location/" /etc/nginx/sites-available/default
+
+# Restart Nginx
 service nginx restart
