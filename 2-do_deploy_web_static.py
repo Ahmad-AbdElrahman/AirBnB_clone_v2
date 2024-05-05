@@ -3,7 +3,7 @@ from datetime import datetime
 from fabric.api import put, run, env, cd
 from os import path
 
-env.hosts = ['ubuntu@54.80.218.139', 'ubuntu@54.157.155.123']
+env.hosts = ['54.80.218.139', '54.157.155.123']
 
 def do_pack():
     """Generates a .tgz archive from the contents
@@ -18,6 +18,8 @@ def do_pack():
 
 
 def do_deploy(archive_path):
+    """Distributes an .tgz archive through web servers
+    """
 
     if path.exists(archive_path):
         archive = archive_path.split('/')[-1]
@@ -25,9 +27,9 @@ def do_deploy(archive_path):
         put("{}".format(archive_path), "/tmp/")
         with cd("/tmp/"):
             run("tar -xzvf {} -C /data/web_static/releases/".format(archive))
-            run("mv /data/web_static/releases/web_static /data/web_static/releases/{}".format(archive, folder)) 
+            run("mv /data/web_static/releases/web_static /data/web_static/releases/{}".format(folder)) 
             run("rm -rf /tmp/{}".format(archive))
             run("rm -rf /data/web_static/current")
-            run("ln -s /data/web_static/current /data/web_static/releases/{}".format(folder))
+            run("ln -s /data/web_static/releases/{} /data/web_static/current".format(folder))
         return True
     return False
