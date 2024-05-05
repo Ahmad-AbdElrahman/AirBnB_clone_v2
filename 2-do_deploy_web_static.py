@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 from datetime import datetime
-from fabric.api import *
+from fabric.api import put, run, env, cd
 from os import path
 
-
-env.hosts = ['35.229.93.37', '54.196.213.127']
-
+env.hosts = ['ubuntu@54.80.218.139', 'ubuntu@54.157.155.123']
 
 def do_pack():
     """Generates a .tgz archive from the contents
@@ -20,24 +18,16 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """Distributes an .tgz archive through web servers
-    """
 
     if path.exists(archive_path):
-        archive = archive_path.split('/')[1]
-        a_path = "/tmp/{}".format(archive)
+        archive = archive_path.split('/')[-1]
         folder = archive.split('.')[0]
-        f_path = "/data/web_static/releases/{}/".format(folder)
-
-        put(archive_path, a_path)
-        run("mkdir -p {}".format(f_path))
-        run("tar -xzf {} -C {}".format(a_path, f_path))
-        run("rm {}".format(a_path))
-        run("mv -f {}web_static/* {}".format(f_path, f_path))
-        run("rm -rf {}web_static".format(f_path))
-        run("rm -rf /data/web_static/current")
-        run("ln -s {} /data/web_static/current".format(f_path))
-
+        put("{}".format(archive_path), "/tmp/")
+        with cd("/tmp/"):
+            run("tar -xzvf {} -C /data/web_static/releases/".format(archive))
+            run("mv /data/web_static/releases/{} /data/web_static/releases/{}".format(archive, folder)) 
+            run("rm -rf /tmp/{}".format(archive))
+            run("rm -rf /data/web_static/current")
+            run("ln -s /data/web_static/current /data/web_static/releases/{}".format(folder))
         return True
-
     return False
