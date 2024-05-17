@@ -15,6 +15,7 @@ def index():
     """
     return 'Hello HBNB!'
 
+
 @app.route('/hbnb')
 def hbnb():
     """Display 'HBNB!'
