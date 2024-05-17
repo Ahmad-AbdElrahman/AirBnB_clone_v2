@@ -29,13 +29,12 @@ def cisfun(text):
     return 'C ' + text.replace('_', ' ')
 
 
+@app.route('/python/')
 @app.route('/python/<text>')
-def pythonisfun(text):
+def pythonisfun(text='is cool'):
     """Display “Python ” followed by the value of the text variable
     """
-    txt = text.replace('_', ' ') if text else 'is cool'
-    return f'Python {txt}'
-
+    return 'Python ' + text.replace('_', ' ')
 
 
 if __name__ == '__main__':
